@@ -1,0 +1,122 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  padding-top: 20px; /* Add padding to the top of the body */
+}
+.nav-tabs .nav-link {
+  color: #007bff;
+  font-weight: bold;
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+.nav-tabs .nav-link.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+.tab-content {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.card {
+  margin-top: 20px;
+  animation: fadeInUp 0.5s ease forwards; /* Fade in animation for cards */
+}
+.card-title {
+  color: #007bff;
+}
+form {
+  margin-top: 20px;
+}
+label {
+  font-weight: bold;
+}
+button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+button[type="submit"]:hover {
+  background-color: #0056b3;
+  transform: scale(1.05); /* Scale up button on hover */
+}
+.card {
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.card-header {
+  background-color: #fff;
+  border-radius: 15px 15px 0 0;
+  border-bottom: 1px solid #dee2e6;
+}
+.card-body {
+  padding: 20px;
+}
+
+/* Style for the map container */
+#mapone {
+  height: 400px; /* Set the height of the map */
+  width: 100%; /* Set the width to 100% of its container */
+  border-radius: 10px; /* Add border radius */
+  border: 1px solid #ddd; /* Add a border */
+}
+
+/* Style for the marker coordinates display */
+#markerCoordinatesone {
+  margin-top: 10px; /* Add margin on top */
+  padding: 10px; /* Add padding */
+  background-color: #f8f9fa; /* Set background color */
+  border-radius: 5px; /* Add border radius */
+  font-size: 14px; /* Set font size */
+  color: #333; /* Set text color */
+}
+
+/* Style for the map container */
+#maptwo {
+  height: 400px; /* Set the height of the map */
+  width: 100%; /* Set the width to 100% of its container */
+  border-radius: 10px; /* Add border radius */
+  border: 1px solid #ddd; /* Add a border */
+}
+
+/* Keyframe animation for card fade-in */
+@keyframes fadeInUp {
+  0% {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  100% {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Responsive CSS */
+@media (max-width: 768px) {
+  .nav-tabs {
+      flex-wrap: wrap; /* Wrap tabs to a new line on smaller screens */
+  }
+  .nav-item {
+      width: 100%; /* Make each tab item full width */
+      text-align: center; /* Center align tab items */
+      margin-bottom: 10px; /* Add margin between tab items */
+  }
+  .nav-link {
+      padding: 10px; /* Adjust padding for tab links */
+  }
+  .card {
+      margin-top: 10px; /* Reduce margin for cards on smaller screens */
+  }
+  button[type="submit"] {
+      width: 100%; /* Make submit buttons full width on smaller screens */
+  }
+}

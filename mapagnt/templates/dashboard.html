@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static '/dashstyles.css' %}">
+<link rel="stylesheet" href="{% static '/styles.css' %}">
+
+<script type="text/javascript" src="{% static "/js/dashboard.js" %}"></script>
+
+<!-- Bootstrap JS (optional, for Bootstrap components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4 text-center">Dashboard</h1>
+        <div class="row">
+            <!-- Total Projects Card -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title statistic-title">Total Projects</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="statistic-value" id="totalProjects">{{ total_projects }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Projects Card -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title statistic-title">Completed Projects</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="statistic-value" id="completedProjects">{{ completed_projects }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects In Progress Card -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title statistic-title">In Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="statistic-value" id="projectsInProgress">{{ in_progress }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Assets Card -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title statistic-title">Total Road Assets</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="statistic-value">{{ total_assets }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asset Condition Row -->
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h6 class="text-success">Good Assets</h6>
+                        <p class="h4">{{ assets_good }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <h6 class="text-warning">Moderate</h6>
+                        <p class="h4">{{ assets_moderate }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card" style="border-color: #fd7e14;">
+                    <div class="card-body text-center">
+                        <h6 style="color: #fd7e14;">Poor</h6>
+                        <p class="h4">{{ assets_poor }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-danger">
+                    <div class="card-body text-center">
+                        <h6 class="text-danger">Critical</h6>
+                        <p class="h4">{{ assets_critical }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Road Type Counts -->
+        {% if road_type_counts %}
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Projects by Road Type</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex gap-3 flex-wrap">
+                            {% for rt in road_type_counts %}
+                            <span class="badge bg-primary p-2" style="font-size: 0.9rem;">
+                                {{ rt.road_type__name }} ({{ rt.road_type__code }}): {{ rt.count }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Spacing -->
+        <div>
+            <br></br>
+        </div>
+        <!-- Search Bar -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search projects by name">
+            </div>
+        </div>
+
+
+        <div class="row">
+            <!-- Project List -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Project List</h5>
+                        <!-- Tab Navigation -->
+                        <ul class="nav nav-tabs" id="projectTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="allProjectsTab" data-bs-toggle="tab" data-bs-target="#allProjectsContent" type="button" role="tab" aria-controls="allProjectsContent" aria-selected="true">All Projects</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="completedProjectsTab" data-bs-toggle="tab" data-bs-target="#completedProjectsContent" type="button" role="tab" aria-controls="completedProjectsContent" aria-selected="false">One Point Projects</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="inProgressProjectsTab" data-bs-toggle="tab" data-bs-target="#inProgressProjectsContent" type="button" role="tab" aria-controls="inProgressProjectsContent" aria-selected="false">Two Point Projects</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="projectTabsContent">
+                            <!-- All Projects Tab Content -->
+                            <div class="tab-pane fade show active" id="allProjectsContent" role="tabpanel" aria-labelledby="allProjectsTab">
+                                <ul id="projectListAll" class="list-group"></ul>
+                            </div>
+                            <!-- Completed Projects Tab Content -->
+                            <div class="tab-pane fade" id="completedProjectsContent" role="tabpanel" aria-labelledby="completedProjectsTab">
+                                <ul id="projectListCompleted" class="list-group"></ul>
+                            </div>
+                            <!-- Projects In Progress Tab Content -->
+                            <div class="tab-pane fade" id="inProgressProjectsContent" role="tabpanel" aria-labelledby="inProgressProjectsTab">
+                                <ul id="projectListInProgress" class="list-group"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Map -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Project Map</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="markerCoordinates"></div>
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+</html>
+{% endblock %}

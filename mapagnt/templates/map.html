@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4 text-center">Project Lister</h1>
+    <div class="row">
+        <!-- Project Selection -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Select Project</h5>
+                </div>
+                <div class="card-body">
+                    <select id="projectSelect" class="form-select mb-3" aria-label="Select Project">
+                        <option value="" selected disabled>Select a Project</option>
+                        {% for project in twopprojects %}
+                            <option value="{{ project.twopname }}"
+                                    data-start-lat="{{ project.twopstartlat }}"
+                                    data-start-lon="{{ project.twopstartlon }}"
+                                    data-end-lat="{{ project.twopendlat }}"
+                                    data-end-lon="{{ project.twopendlon }}">
+                                {{ project.twopname }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-primary" id="routeBtn">Create Route</button>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="geoJsonLayerToggle">
+                        <label class="form-check-label" for="geoJsonLayerToggle">
+                            Toggle GeoJSON Layer
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Map -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Project Map</h5>
+                </div>
+                <div class="card-body">
+                    <div id="map" style="width: 100%; height: 70vh"></div>
+                    <div id="markerCoordinates"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+<script type="text/javascript" src ="{% static "dist/leaflet.ajax.js" %}"></script>
+<script type="text/javascript" src ="{% static "dist/leaflet.ajax.min.js" %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var map = L.map('map').setView([19.997454, 73.789803], 11);
+
+    // Add Google Maps as the tile layer
+    var mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+    L.tileLayer('http://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        attribution: 'Leaflet &copy; ' + mapLink + ', contribution',
+        maxZoom: 18
+    }).addTo(map);
+
+    var taxiIcon = L.icon({
+        iconUrl: '{% static "images/pipe.jpg" %}',
+        iconSize: [30, 30]
+    });
+
+    var geoJsonLayer = null; // Variable to hold the GeoJSON layer
+
+    // Function to load geojson data from Django endpoint and add to the map
+    function loadGeoJsonData() {
+        geoJsonLayer = new L.GeoJSON.AJAX("{% url 'countrybounderydata' %}", {
+            onEachFeature: function (feature, layer) {
+                if (feature.properties && feature.properties.name) {
+                    layer.bindPopup(feature.properties.name);
+                }
+            }
+        }).addTo(map);
+    }
+
+    // Function to toggle the visibility of the GeoJSON layer
+    function toggleGeoJsonLayer() {
+        if (geoJsonLayer) {
+            if (map.hasLayer(geoJsonLayer)) {
+                map.removeLayer(geoJsonLayer);
+            } else {
+                map.addLayer(geoJsonLayer);
+            }
+        }
+    }
+
+    // Event listener for route creation button
+    $('#routeBtn').click(function () {
+        var selectedOption = $('#projectSelect option:selected');
+
+        if (selectedOption.length) {
+            var startLat = parseFloat(selectedOption.data('start-lat'));
+            var startLon = parseFloat(selectedOption.data('start-lon'));
+            var endLat = parseFloat(selectedOption.data('end-lat'));
+            var endLon = parseFloat(selectedOption.data('end-lon'));
+
+            // Clear existing markers and routes
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Add markers for start and end points
+            var startMarker = L.marker([startLat, startLon], { icon: taxiIcon }).addTo(map);
+            var endMarker = L.marker([endLat, endLon]).addTo(map);
+
+            // Create routing control with waypoints
+            L.Routing.control({
+                waypoints: [
+                    L.latLng(startLat, startLon),
+                    L.latLng(endLat, endLon)
+                ],
+                routeWhileDragging: true
+            }).addTo(map);
+
+            // Set map view to show both markers
+            map.fitBounds([
+                [startLat, startLon],
+                [endLat, endLon]
+            ]);
+
+            // Display project details in HTML
+            var projectName = selectedOption.val();
+            var markerCoordinates = document.getElementById('markerCoordinates');
+            markerCoordinates.innerHTML = `
+                <strong>Project Name:</strong> ${projectName}<br>
+                <strong>Start Coordinates:</strong> (${startLat.toFixed(6)}, ${startLon.toFixed(6)})<br>
+                <strong>End Coordinates:</strong> (${endLat.toFixed(6)}, ${endLon.toFixed(6)})
+            `;
+        } else {
+            alert('Please select a project.');
+        }
+    });
+
+    // Load GeoJSON data when the page is loaded
+    loadGeoJsonData();
+
+    // Event listener for toggling GeoJSON layer visibility
+    $('#geoJsonLayerToggle').change(function () {
+        toggleGeoJsonLayer();
+    });
+});
+</script>
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<link rel="stylesheet" href="{% static 'operationstyle.css' %}">
+<link rel="stylesheet" href="{% static 'styles.css' %}">
+{% endblock %}

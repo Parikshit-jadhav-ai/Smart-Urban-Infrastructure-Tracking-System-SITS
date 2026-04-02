@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="{% static 'operationssestyle.css' %}">
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <!-- Include Leaflet JS and Custom Mapping JS -->
+    <script type="text/javascript" src="{% static "/js/operationsse.js" %}"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <!-- Tabs Section -->
+            <div class="col-md-12">
+                <ul class="nav nav-tabs" id="projectTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="twoPointsTab" data-bs-toggle="tab" data-bs-target="#twoPointsContent" type="button" role="tab" aria-controls="twoPointsContent" aria-selected="true">Add New Project (Two Points)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="budgetTab" data-bs-toggle="tab" data-bs-target="#budgetContent" type="button" role="tab" aria-controls="budgetContent" aria-selected="false">Budgeting</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="expensesTab" data-bs-toggle="tab" data-bs-target="#expensesContent" type="button" role="tab" aria-controls="expensesContent" aria-selected="false">Expenses</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="projectTabsContent">
+                    <!-- Add New Project (Two Points) Tab Content -->
+                    <div class="tab-pane fade show active" id="twoPointsContent" role="tabpanel" aria-labelledby="twoPointsTab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2 class="card-title">Add New Project (Two Points)</h2>
+                                <form method="post" action="{% url 'create_twoproject' %}" class="responsive-form">
+                                    {% csrf_token %}
+                                        <label for="twopname">Project Name:</label><br>
+                                        <input type="text" id="twopname" name="twopname" class="form-control"><br>
+
+                                        <label for="twoptype" class="form-label">Project Type:</label>
+                                    <select id="twoptype" name="twoptype" class="form-select">
+                                        {% if twoproject_types %}
+                                            <option value="" disabled selected>Select Project Type</option>
+                                            {% for choice in twoproject_types %}
+                                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <option value="" disabled>No project types available</option>
+                                        {% endif %}
+                                    </select><br>
+
+                                    <!-- Road Type (NEW) -->
+                                    <label for="road_type" class="form-label">Road Type:</label>
+                                    <select id="road_type" name="road_type" class="form-select">
+                                        <option value="">-- None --</option>
+                                        {% for rt in road_types %}
+                                        <option value="{{ rt.id }}">{{ rt.name }} ({{ rt.code }})</option>
+                                        {% endfor %}
+                                    </select><br>
+
+                                    <label for="twopbudget">Budget:</label><br>
+                                    <input type="number" id="twopbudget" name="twopbudget" class="form-control"><br>
+
+                                    <label for="twopstatus">Status:</label><br>
+                                    <select id="twopstatus" name="twopstatus" class="form-select">
+                                        {% if oneproject_statuses %}
+                                            <option value="" disabled selected>Select Project Status</option>
+                                            {% for choice in twoproject_statuses %}
+                                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <option value="" disabled>project status unavailable</option>
+                                        {% endif %}
+                                    </select><br><br>
+
+                                    <label for="twocoordinatorname">Coordinator Name:</label><br>
+                                    <input type="text" id="twocoordinatorname" name="twocoordinatorname" class="form-control"><br>
+
+                                    <label for="twopdescription">Description:</label><br>
+                                    <textarea id="twoonepdescription" name="twoonepdescription"  class="form-control" rows="3"></textarea><br>
+
+                                    <label for="twopaddress">Address:</label><br>
+                                    <input type="text" id="twopaddress" name="twopaddress" class="form-control"><br>
+
+                                    <!-- Carriageway Width & Lanes (NEW) -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="carriageway_width">Carriageway Width (m):</label>
+                                            <input type="number" id="carriageway_width" name="carriageway_width" class="form-control" step="0.1">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="lanes">Lanes:</label>
+                                            <input type="number" id="lanes" name="lanes" class="form-control" value="2" min="1">
+                                        </div>
+                                    </div><br>
+
+                                    <!-- Map Container -->
+                                    <div class="map-card-body">
+                                        <div id="markerCoordinatestwo"></div>
+                                        <div id="maptwo"></div> <!-- Map will be rendered here -->
+                                        <p class="text-muted small mt-1">Click on map to place start (1st click) and end (2nd click) markers. A route line will be drawn.</p>
+                                    </div><br>
+                                    <label for="latitude1">Latitude (Marker 1):</label>
+                                    <input type="text" id="latitude1" name="latitude1" class="form-control"><br>
+                                    <label for="longitude1">Longitude (Marker 1):</label>
+                                    <input type="text" id="longitude1" name="longitude1" class="form-control"><br>
+
+                                    <!-- Latitude and Longitude Input Fields for Marker 2 -->
+                                    <label for="latitude2">Latitude (Marker 2):</label>
+                                    <input type="text" id="latitude2" name="latitude2" class="form-control"><br>
+                                    <label for="longitude2">Longitude (Marker 2):</label>
+                                    <input type="text" id="longitude2" name="longitude2" class="form-control"><br>
+
+                                    <!-- Hidden route coordinates (NEW) -->
+                                    <input type="hidden" id="route_coords" name="route_coords">
+
+                                    <button type="submit" class="form-button">Save</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Budgeting Tab Content -->
+                    <div class="tab-pane fade" id="budgetContent" role="tabpanel" aria-labelledby="budgetTab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2 class="card-title">Budgeting</h2>
+                                <p>Content for Budgeting tab goes here.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Expenses Tab Content -->
+                    <div class="tab-pane fade" id="expensesContent" role="tabpanel" aria-labelledby="expensesTab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2 class="card-title">Expenses</h2>
+                                <p>Content for Expenses tab goes here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional, for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+
+</body>
+</html>
+{% endblock %}

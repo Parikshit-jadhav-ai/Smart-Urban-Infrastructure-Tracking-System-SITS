@@ -1,0 +1,1 @@
+>python manage.py ogrinspect C:\Users\SID\Envs\geoapp\geobot\geodata\India_District_Shapefile\India_Districts.shp districtsboundery --srid=4326 --mapping --multi

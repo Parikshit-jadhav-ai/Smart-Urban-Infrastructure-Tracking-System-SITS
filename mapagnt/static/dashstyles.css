@@ -1,0 +1,88 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+.card {
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.card-header {
+  background-color: #fff;
+  border-radius: 15px 15px 0 0;
+  border-bottom: 1px solid #dee2e6;
+}
+.card-body {
+  padding: 20px;
+  max-height: 300px; /* Limit card body height */
+  overflow-y: auto; /* Enable vertical scroll if content exceeds max height */
+}
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid #dee2e6;
+}
+.list-group-item:last-child {
+  border-bottom: none;
+}
+/* Primary Button (Blue) */
+.btn-edit,
+.btn-delete,
+.btn-showdetail {
+  background-color: #007BFF;
+  border-color: #007BFF;
+  color: #FFFFFF; /* Text color */
+}
+.btn-edit,
+.btn-delete {
+  margin-right: 5px; /* Add margin between edit/delete buttons */
+}
+@media (max-width: 768px) {
+  .card {
+      margin-bottom: 20px; /* Add space between cards on smaller screens */
+  }
+}
+      /* Primary Button (Blue) */
+.btn-edit {
+  background-color: #007BFF;
+  border-color: #007BFF;
+  color: #FFFFFF; /* Text color */
+}
+
+/* Danger Button (Red) */
+.btn-delete {
+  background-color: #DC3545;
+  border-color: #DC3545;
+  color: #FFFFFF; /* Text color */
+}
+/* Show Details Button (Blue) */
+.btn-showdetail {
+  background-color: #007BFF;
+  border-color: #007BFF;
+  color: #FFFFFF; /* Text color */
+}
+
+.btn-primary:hover, .btn-danger:hover {
+  transform: translateY(-3px);
+}
+@media (max-width: 768px) {
+  .col-md-6 {
+      flex: 0 0 100%;
+      max-width: 100%;
+  }
+}   
+#map {
+  height: 250px;
+}
+#markerCoordinates {
+  position: absolute;
+  top: -5px;
+  right: 20px;
+  background-color: transparent;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}  

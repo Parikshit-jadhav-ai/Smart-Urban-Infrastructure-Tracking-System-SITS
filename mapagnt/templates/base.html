@@ -1,0 +1,46 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geomapper</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+</head>
+<body>
+    <div class="container">
+        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-6 border-bottom navbar-custom">
+            <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+                <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+            </a>
+
+            <ul class="nav col-1 col-md-auto mb-2 justify-content-center mb-md-0">
+                <li><a href="/dashboard" class="nav-link btn-custom">Dashboard</a></li>
+                <li><a href="/operations" class="nav-link btn-custom">Ops-1point</a></li>
+                <li><a href="/operationsse" class="nav-link btn-custom">Ops-2point</a></li>
+                <li><a href="/route" class="nav-link btn-custom">Projects Route</a></li>
+                <li><a href="/maproute" class="nav-link btn-custom">Map Route</a></li>
+                <li><a href="/road-assets" class="nav-link btn-custom">Road Assets</a></li>
+                <li><a href="/chainage" class="nav-link btn-custom">Chainage</a></li>
+            </ul>
+
+            <div class="col-md-3 text-end">
+                <button type="button" class="btn btn-outline-custom me-2">Login</button>
+                <button type="button" class="btn btn-primary-custom">Sign-up</button>
+            </div>
+        </header>
+    </div>
+
+    <!-- Content block for child templates -->
+    <div class="container mt-5">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Bootstrap JS (optional, for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chainage Management</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="{% static 'chainage_style.css' %}">
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+</head>
+<body>
+<div class="container-fluid">
+    <h1 class="mb-4 text-center">Chainage Management</h1>
+
+    <div class="row mb-3">
+        <!-- Project Selector & Controls -->
+        <div class="col-md-12">
+            <div class="card mb-3">
+                <div class="card-body d-flex flex-wrap gap-3 align-items-end">
+                    <div>
+                        <label for="chainageProject" class="form-label">Select Road Project</label>
+                        <select id="chainageProject" class="form-select form-select-sm">
+                            <option value="">-- Select Project --</option>
+                            {% for proj in projects %}
+                            <option value="{{ proj.id }}">{{ proj.twopname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="markerInterval" class="form-label">Marker Interval (m)</label>
+                        <input type="number" id="markerInterval" class="form-control form-control-sm"
+                               value="1000" min="100" step="100">
+                    </div>
+                    <div>
+                        <button id="btnShowMarkers" class="btn btn-primary btn-sm">Show Chainage Markers</button>
+                    </div>
+                    <div>
+                        <button id="btnClearMarkers" class="btn btn-outline-secondary btn-sm">Clear Markers</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Map -->
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header"><h5 class="card-title">Chainage Map</h5></div>
+                <div class="card-body">
+                    <div id="chainageMap" style="height: 500px;"></div>
+                    <div id="chainageInfo" class="mt-2 text-muted small"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events & Add Form -->
+        <div class="col-md-5">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#eventListTab" type="button">Chainage Events</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#addEventTab" type="button">Add Event</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Event List -->
+                        <div class="tab-pane fade show active" id="eventListTab">
+                            <div id="eventListContainer" style="max-height: 420px; overflow-y: auto;">
+                                <p class="text-muted">Select a project to view events.</p>
+                            </div>
+                        </div>
+
+                        <!-- Add Event Form -->
+                        <div class="tab-pane fade" id="addEventTab">
+                            <form id="addEventForm">
+                                {% csrf_token %}
+                                <div class="mb-2">
+                                    <label class="form-label">Project</label>
+                                    <select name="project" id="eventProject" class="form-select form-select-sm" required>
+                                        <option value="">Select Project</option>
+                                        {% for proj in projects %}
+                                        <option value="{{ proj.id }}">{{ proj.twopname }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Event Type</label>
+                                    <select name="event_type" class="form-select form-select-sm" required>
+                                        {% for val, label in event_types %}
+                                        <option value="{{ val }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Chainage (m)</label>
+                                    <input type="number" name="chainage" id="eventChainage"
+                                           class="form-control form-control-sm" step="0.01" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Latitude</label>
+                                    <input type="text" name="lat" id="eventLat"
+                                           class="form-control form-control-sm" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Longitude</label>
+                                    <input type="text" name="lng" id="eventLng"
+                                           class="form-control form-control-sm" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" class="form-control form-control-sm" rows="2"></textarea>
+                                </div>
+                                <p class="text-muted small">Click on map to set location and auto-compute chainage.</p>
+                                <button type="submit" class="btn btn-primary btn-sm">Add Event</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Route Info -->
+            <div class="card">
+                <div class="card-header"><h5 class="card-title">Route Info</h5></div>
+                <div class="card-body">
+                    <div id="routeInfoPanel">
+                        <p class="text-muted">Select a project to see route info.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static '/js/chainage.js' %}"></script>
+</body>
+</html>
+{% endblock %}

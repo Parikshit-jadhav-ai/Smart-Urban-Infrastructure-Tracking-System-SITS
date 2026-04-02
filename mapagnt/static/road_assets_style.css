@@ -1,0 +1,44 @@
+/* Road Assets Page Styles */
+#assetMap {
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+}
+
+.badge {
+    text-transform: capitalize;
+}
+
+.list-group-item {
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 100%);
+    color: #fff;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.card-header .nav-tabs .nav-link {
+    color: #ccc;
+}
+
+.card-header .nav-tabs .nav-link.active {
+    color: #1a2a3a;
+    background: #fff;
+}
+
+h1 {
+    font-weight: 700;
+    color: #1a2a3a;
+}

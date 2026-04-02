@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Lister</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="{% static '/mapstyles.css' %}">
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4 text-center">Project Routing</h1>
+        <div class="row">
+            <!-- Project List -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Project List</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul id="projectListAll" class="list-group">
+                            <!-- Project items will be dynamically populated here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Map -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Project Map</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="map" style="height: 400px;"></div>
+                        <div id="markerCoordinates"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional, for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize Leaflet map
+            const map = L.map('map').setView([19.9975, 73.7898], 13);
+            L.tileLayer('http://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        
+            // Function to show project coordination on the map
+            function showProjectOnMap(projectName, latitude, longitude) {
+                // Clear previous markers from the map
+                map.eachLayer(function (layer) {
+                    if (layer instanceof L.Marker) {
+                        map.removeLayer(layer);
+                    }
+                });
+        
+                // Convert latitude and longitude to floating point numbers
+                const lat = parseFloat(latitude);
+                const lng = parseFloat(longitude);
+        
+                // Create a new marker and add it to the map
+                const marker = L.marker([lat, lng]).addTo(map);
+        
+                // Set the map view to the marker's location
+                map.setView([lat, lng], 13);
+        
+                // Display the project name and coordinates
+                const markerCoordinates = document.getElementById('markerCoordinates');
+                markerCoordinates.innerHTML = `
+                    <strong>Project Name:</strong> ${projectName}<br>
+                    <strong>Latitude:</strong> ${lat.toFixed(6)}<br>
+                    <strong>Longitude:</strong> ${lng.toFixed(6)}
+                `;
+            }
+        
+            // Function to show two-point project on the map
+            function showTwoPointProjectOnMap(projectName, startLat, startLng, endLat, endLng) {
+                // Clear previous markers and polylines from the map
+                map.eachLayer(function (layer) {
+                    if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+                        map.removeLayer(layer);
+                    }
+                });
+        
+                // Create start and end coordinates as LatLng objects
+                const startLatLng = L.latLng(parseFloat(startLat), parseFloat(startLng));
+                const endLatLng = L.latLng(parseFloat(endLat), parseFloat(endLng));
+        
+                // Create marker for start point and add to map
+                const startMarker = L.marker(startLatLng).addTo(map);
+                startMarker.bindPopup(`<strong>${projectName} Start</strong><br>Latitude: ${startLat}<br>Longitude: ${startLng}`);
+        
+                // Create marker for end point and add to map
+                const endMarker = L.marker(endLatLng).addTo(map);
+                endMarker.bindPopup(`<strong>${projectName} End</strong><br>Latitude: ${endLat}<br>Longitude: ${endLng}`);
+        
+                // Create routing control for the two points and add to map
+                L.Routing.control({
+                    waypoints: [
+                        startLatLng,
+                        endLatLng
+                    ]
+                }).addTo(map);
+        
+                // Fit map bounds to show all markers and polyline
+                const bounds = L.latLngBounds([startLatLng, endLatLng]);
+                map.fitBounds(bounds);
+        
+                // Display project details in HTML element
+                const markerCoordinates = document.getElementById('markerCoordinates');
+                markerCoordinates.innerHTML = `
+                    <strong>Project Name:</strong> ${projectName}<br>
+                    <strong>Start Coordinates:</strong> (${startLat.toFixed(6)}, ${startLng.toFixed(6)})<br>
+                    <strong>End Coordinates:</strong> (${endLat.toFixed(6)}, ${endLng.toFixed(6)})
+                `;
+            }
+        
+            // Fetch project data from backend API
+            fetch('/fetch_allprojects/')
+                .then(response => response.json())
+                .then(data => {
+                    const projectList = document.getElementById('projectListAll');
+        
+                    // Clear existing content
+                    projectList.innerHTML = '';
+        
+                    // Populate project names in the project list
+                    data.allprojects.forEach(project => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.textContent = project.onepname || project.twopname; // Use appropriate project name field
+        
+                        listItem.onclick = function() {
+                            if (project.onepname) {
+                                showProjectOnMap(project.onepname, project.oneplatitude, project.oneplongitude);
+                            } else if (project.twopname && project.twopstartlat && project.twopstartlon && project.twopendlat && project.twopendlon) {
+                                showTwoPointProjectOnMap(project.twopname, project.twopstartlat, project.twopstartlon, project.twopendlat, project.twopendlon);
+                            }
+                        };
+        
+                        projectList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching projects:', error));
+        });
+        
+
+    </script>
+</body>
+</html>
+{% endblock %}
