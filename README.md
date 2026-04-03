@@ -21,3 +21,4 @@
 5. Run server: `python manage.py runserver`.
 
 For more details, see the [Full Project Documentation](PROJECT_DOCUMENTATION.md).
+# Smart-Urban-Infrastructure-Tracking-System-SITS
